@@ -1,0 +1,367 @@
+/* contract.css：合同表单 / 合同列表样式（复用 styles.css 的变量与基础组件） */
+
+/* ----- 视图切换 ----- */
+.ct-view {
+  display: none;
+}
+
+.ct-view.active {
+  display: block;
+}
+
+/* ----- 列表 ----- */
+.ct-result-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ct-chips {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ct-chip {
+  background: var(--green-soft);
+  color: var(--green);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+/* 合同信息以文本为主，左对齐更好读 */
+.ct-table th,
+.ct-table td {
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.ct-table td.num,
+.ct-table th.num {
+  text-align: right;
+}
+
+.ct-table tbody tr {
+  cursor: pointer;
+}
+
+.ct-table tbody tr:hover {
+  background: var(--green-soft);
+}
+
+/* 甲乙方分组表头 */
+.ct-table .ct-group-th {
+  text-align: center;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ct-table .ct-company {
+  font-weight: 600;
+}
+
+/* Created By：人名下面跟一行创建时间 */
+.ct-table .ct-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 地址最多显示两行，完整内容放在 title 里 */
+.ct-address {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 170px;
+  max-width: 220px;
+  white-space: normal;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.ct-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.ct-empty td {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 0;
+  cursor: default;
+}
+
+/* 搜索命中高亮 */
+.ct-hit {
+  background: #fdf0c8;
+  border-radius: 3px;
+}
+
+/* 类型 / 状态标签 */
+.ct-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  background: var(--blue-soft);
+  color: #35506e;
+}
+
+.ct-tag.revenue_sharing {
+  background: var(--peach);
+  color: #8a5a2b;
+}
+
+/* Amount 列里的分成标记 */
+.ct-split-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  background: var(--peach);
+  color: #8a5a2b;
+}
+
+.table-toolbar .filter input[type="date"],
+.table-toolbar .filter input[type="text"] {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  font-family: inherit;
+}
+
+/* ----- 表单 ----- */
+.ct-form-panel {
+  padding-bottom: 8px;
+}
+
+.ct-section {
+  margin-top: 22px;
+}
+
+.ct-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f4f7f5;
+  border-left: 3px solid var(--green);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+button.ct-section-title {
+  width: 100%;
+  border: 0;
+  border-left: 3px solid var(--green);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  justify-content: space-between;
+}
+
+.ct-caret {
+  color: var(--muted);
+  font-size: 16px;
+  transition: transform 0.15s;
+}
+
+.ct-collapsible.collapsed .ct-caret {
+  transform: rotate(-90deg);
+}
+
+.ct-collapsible.collapsed .ct-grid {
+  display: none;
+}
+
+.ct-mode-tag {
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--peach);
+  color: #8a5a2b;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.ct-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 14px 20px;
+}
+
+/* [hidden] 会被 display:grid 覆盖，需显式声明 */
+.ct-grid[hidden] {
+  display: none;
+}
+
+.ct-col-2 {
+  grid-column: 1 / -1;
+}
+
+.ct-form .filter {
+  font-size: 13px;
+}
+
+.ct-form input[type="text"],
+.ct-form input[type="number"],
+.ct-form input[type="date"],
+.ct-form textarea,
+.ct-form select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  font-family: inherit;
+  width: 100%;
+}
+
+.ct-form input:focus,
+.ct-form textarea:focus,
+.ct-form select:focus {
+  outline: 0;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(47, 107, 79, 0.12);
+}
+
+.ct-form input[readonly] {
+  background: #f4f7f5;
+  color: var(--muted);
+}
+
+.ct-form .req {
+  color: #c0522f;
+}
+
+/* 字段校验失败 */
+.ct-form .invalid input,
+.ct-form .invalid select,
+.ct-form .invalid textarea {
+  border-color: #c0522f;
+  background: #fdf5f3;
+}
+
+.ct-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ct-range i {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.ct-suffix-input {
+  position: relative;
+  display: block;
+}
+
+.ct-suffix-input input {
+  padding-right: 30px;
+}
+
+.ct-suffix-input i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-style: normal;
+  font-size: 14px;
+}
+
+.ct-error {
+  color: #c0522f;
+  font-size: 13px;
+  min-height: 18px;
+  margin: 14px 0 0;
+}
+
+/* ----- 底部操作条 ----- */
+.ct-actionbar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.ct-btn {
+  flex: 1;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+
+.ct-btn:hover {
+  opacity: 0.88;
+}
+
+.ct-btn-approve {
+  flex: 2;
+  background: #1a2b24;
+  border-color: #1a2b24;
+  color: #fff;
+}
+
+.ct-btn-reject:hover {
+  border-color: #c0522f;
+  color: #c0522f;
+}
+
+/* ----- 轻提示 ----- */
+.ct-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  background: #1a2b24;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  z-index: 60;
+}
+
+@media (max-width: 760px) {
+  .ct-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ct-actionbar {
+    flex-wrap: wrap;
+  }
+}

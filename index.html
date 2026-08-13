@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>合同管理</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="contract.css" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ========== 列表视图 ========== -->
+    <section id="view-list" class="ct-view active">
+      <div class="panel">
+        <div class="panel-head panel-head-row">
+          <div>
+            <h2>合同管理</h2>
+            <p class="subtitle">按类型 / 地区 / 状态筛选，点击一行进入合同表单</p>
+          </div>
+        </div>
+
+        <div class="table-toolbar" id="ct-toolbar">
+          <label class="filter inline-filter">
+            Contract type
+            <select id="f-type"><option value="">全部</option></select>
+          </label>
+          <label class="filter inline-filter">
+            Region
+            <select id="f-region"><option value="">全部</option></select>
+          </label>
+          <label class="filter inline-filter">
+            状态
+            <select id="f-status"><option value="">全部</option></select>
+          </label>
+          <label class="filter inline-filter">
+            Currency
+            <select id="f-currency"><option value="">全部</option></select>
+          </label>
+          <label class="filter inline-filter">
+            Legal role
+            <select id="f-role"><option value="">全部</option></select>
+          </label>
+          <label class="filter inline-filter">
+            Effective 起
+            <input type="date" id="f-eff-from" />
+          </label>
+          <label class="filter inline-filter">
+            Effective 止
+            <input type="date" id="f-eff-to" />
+          </label>
+          <label class="filter inline-filter search-filter">
+            搜索
+            <input
+              type="text"
+              id="f-search"
+              placeholder="按合同名称 / ID / 甲乙方公司 / 角色 / 地址 / 联系人 / 邮箱 / 金额 / 分成比例 / 创建人搜索"
+            />
+          </label>
+          <button type="button" class="cf-btn cf-ghost" id="btn-reset-filter">重置筛选</button>
+        </div>
+
+        <div class="ct-result-bar">
+          <span id="ct-count">—</span>
+          <span class="ct-chips" id="ct-chips"></span>
+        </div>
+
+        <div class="table-wrap wide">
+          <table class="data-table ct-table">
+            <thead>
+              <tr>
+                <th class="sortable-th" rowspan="2" data-sort-key="id">Contract ID</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="name">Contract Name</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="type">Contract Type</th>
+                <th class="sortable-th num" rowspan="2" data-sort-key="amount">Amount</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="currency">Currency</th>
+                <th class="sortable-th num" rowspan="2" data-sort-key="splitRatio">Split Ratio</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="region">Region</th>
+                <th class="ct-group-th" colspan="5">Party A</th>
+                <th class="ct-group-th" colspan="5">Party B</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="effectiveDate">Effective Date</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="endDate">End Date</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="createdAt">Created By</th>
+              </tr>
+              <tr>
+                <th class="sortable-th" data-sort-key="partyA">Company name</th>
+                <th>Legal role</th>
+                <th>Address</th>
+                <th>Contact Person</th>
+                <th>Contact Info</th>
+                <th class="sortable-th" data-sort-key="partyB">Company name</th>
+                <th>Legal role</th>
+                <th>Address</th>
+                <th>Contact Person</th>
+                <th>Contact Info</th>
+              </tr>
+            </thead>
+            <tbody id="ct-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 表单视图 ========== -->
+    <section id="view-form" class="ct-view">
+      <div class="panel ct-form-panel">
+        <div class="panel-head panel-head-row">
+          <div>
+            <h2 id="form-title">Summary</h2>
+            <p class="subtitle" id="form-subtitle">合同信息填写</p>
+          </div>
+          <button type="button" class="btn-secondary" id="btn-back-list">← 返回列表</button>
+        </div>
+
+        <form id="contract-form" class="ct-form" novalidate>
+
+          <!-- Basic -->
+          <div class="ct-section">
+            <div class="ct-section-title">Basic</div>
+            <div class="ct-grid">
+              <label class="filter">
+                <span class="ct-label">Contract Name <b class="req">*</b></span>
+                <input type="text" id="fm-name" placeholder="例：Adobe Creative Cloud 法人契約" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Contract ID <b class="req">*</b></span>
+                <input type="text" id="fm-id" placeholder="例：DR4188716" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Contract Type <b class="req">*</b></span>
+                <select id="fm-type"></select>
+              </label>
+              <label class="filter">
+                <span class="ct-label">Region <b class="req">*</b></span>
+                <select id="fm-region"></select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dates -->
+          <div class="ct-section">
+            <div class="ct-section-title">Dates</div>
+            <div class="ct-grid">
+              <label class="filter">
+                <span class="ct-label">Sign date <b class="req">*</b></span>
+                <input type="date" id="fm-sign-date" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">End date <b class="req">*</b></span>
+                <input type="date" id="fm-end-date" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Effective Date <b class="req">*</b></span>
+                <input type="date" id="fm-effective-date" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Service Period <b class="req">*</b></span>
+                <span class="ct-range">
+                  <input type="date" id="fm-service-start" />
+                  <i>-</i>
+                  <input type="date" id="fm-service-end" />
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Amount：普通合同 / 分成合同两套字段 -->
+          <div class="ct-section">
+            <div class="ct-section-title">
+              Amount
+              <span class="ct-mode-tag" id="amount-mode-tag">总额合同</span>
+            </div>
+
+            <div class="ct-grid">
+              <!-- Total Amount：总额合同填金额；分成合同固定显示 Revenue Split -->
+              <label class="filter" id="field-total-amount">
+                <span class="ct-label">Total Amount <b class="req">*</b></span>
+                <input type="number" id="fm-total-amount" step="0.01" min="0" placeholder="18420.00" />
+              </label>
+              <label class="filter" id="field-split-placeholder" hidden>
+                Total Amount
+                <input type="text" id="fm-split-placeholder" value="Revenue Split" readonly />
+              </label>
+
+              <!-- Currency：独立字段，两种类型都用它 -->
+              <label class="filter">
+                <span class="ct-label">Currency <b class="req">*</b></span>
+                <select id="fm-currency"></select>
+              </label>
+
+              <!-- Split Ratio：仅分成合同 -->
+              <label class="filter" id="field-split-ratio" hidden>
+                <span class="ct-label">Split Ratio <b class="req">*</b></span>
+                <span class="ct-suffix-input">
+                  <input type="number" id="fm-split-ratio" step="0.01" min="0" max="100" placeholder="12" />
+                  <i>%</i>
+                </span>
+              </label>
+              <label class="filter" id="field-settle-cycle" hidden>
+                <span class="ct-label">结算周期 <b class="req">*</b></span>
+                <select id="fm-settle-cycle">
+                  <option value="">请选择</option>
+                  <option value="monthly">按月结算</option>
+                  <option value="quarterly">按季结算</option>
+                  <option value="yearly">按年结算</option>
+                </select>
+              </label>
+              <label class="filter ct-col-2" id="field-split-base" hidden>
+                分成基数
+                <input type="text" id="fm-split-base" placeholder="例：净收入（扣除渠道费与退款）" />
+              </label>
+            </div>
+            <p class="hint" id="amount-hint"></p>
+          </div>
+
+          <!-- Party A -->
+          <div class="ct-section ct-collapsible" data-party="a">
+            <button type="button" class="ct-section-title ct-toggle" data-target="party-a">
+              Party A <span class="ct-caret">⌄</span>
+            </button>
+            <div class="ct-grid" id="party-a">
+              <label class="filter">
+                <span class="ct-label">Company name <b class="req">*</b></span>
+                <input type="text" id="fm-a-company" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Legal role <b class="req">*</b></span>
+                <select id="fm-a-role"></select>
+              </label>
+              <label class="filter ct-col-2">
+                Address
+                <input type="text" id="fm-a-address" />
+              </label>
+              <label class="filter">
+                Contact Person
+                <input type="text" id="fm-a-contact" />
+              </label>
+              <label class="filter">
+                Contact Info
+                <input type="text" id="fm-a-email" placeholder="邮箱 / 电话" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Party B -->
+          <div class="ct-section ct-collapsible" data-party="b">
+            <button type="button" class="ct-section-title ct-toggle" data-target="party-b">
+              Party B <span class="ct-caret">⌄</span>
+            </button>
+            <div class="ct-grid" id="party-b">
+              <label class="filter">
+                <span class="ct-label">Company name <b class="req">*</b></span>
+                <input type="text" id="fm-b-company" />
+              </label>
+              <label class="filter">
+                <span class="ct-label">Legal role <b class="req">*</b></span>
+                <select id="fm-b-role"></select>
+              </label>
+              <label class="filter ct-col-2">
+                Address
+                <input type="text" id="fm-b-address" />
+              </label>
+              <label class="filter">
+                Contact Person
+                <input type="text" id="fm-b-contact" />
+              </label>
+              <label class="filter">
+                Contact Info
+                <input type="text" id="fm-b-email" placeholder="邮箱 / 电话" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Submitter -->
+          <div class="ct-section">
+            <div class="ct-section-title">Submitter</div>
+            <div class="ct-grid">
+              <label class="filter">
+                Created By
+                <input type="text" id="fm-created-by" readonly />
+              </label>
+              <label class="filter">
+                <span class="ct-label">提交人 <b class="req">*</b></span>
+                <input type="text" id="fm-submitter" />
+              </label>
+              <label class="filter">
+                部门
+                <input type="text" id="fm-dept" />
+              </label>
+              <label class="filter">
+                提交日期
+                <input type="date" id="fm-submit-date" />
+              </label>
+              <label class="filter ct-col-2">
+                备注
+                <textarea id="fm-remark" rows="2" placeholder="补充说明，例如付款节点、续约条件"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <p class="ct-error" id="form-error"></p>
+        </form>
+      </div>
+
+      <!-- 底部操作条 -->
+      <div class="ct-actionbar">
+        <button type="button" class="ct-btn ct-btn-reject" id="btn-reject">✕ Reject</button>
+        <button type="button" class="ct-btn ct-btn-save" id="btn-save">保存草稿</button>
+        <button type="button" class="ct-btn ct-btn-approve" id="btn-approve">✓ Approve to F</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="ct-toast" id="ct-toast" hidden></div>
+
+  <script src="contract-data.js"></script>
+  <script src="contract.js"></script>
+</body>
+</html>

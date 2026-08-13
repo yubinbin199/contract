@@ -1,0 +1,9 @@
+{
+  "name": "contract",
+  "version": "1.0.0",
+  "private": true,
+  "description": "合同管理：列表筛选 / 搜索 + 合同表单（Revenue Sharing 走分成字段）",
+  "scripts": {
+    "start": "npx --yes serve -l 3000"
+  }
+}
