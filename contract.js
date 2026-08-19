@@ -152,6 +152,8 @@ function searchableText(c) {
     c.totalAmount,
     c.splitRatio === null ? "" : c.splitRatio + "%",
     c.splitBase,
+    c.sourceFile ? c.sourceFile.name : "",
+    (c.invoices || []).join(" "),
     c.createdBy.name,
     c.createdBy.at,
     c.submitter.name,
@@ -224,8 +226,29 @@ function renderList() {
 
   if (!rows.length) {
     $("ct-body").innerHTML =
-      '<tr class="ct-empty"><td colspan="20">没有符合条件的合同，试试放宽筛选条件</td></tr>';
+      '<tr class="ct-empty"><td colspan="22">没有符合条件的合同，试试放宽筛选条件</td></tr>';
     return;
+  }
+
+  /** 原文件：合同 PDF，新标签打开 */
+  function fileCell(c) {
+    if (!c.sourceFile || !c.sourceFile.name) return "—";
+    return (
+      '<a class="ct-doc-link" href="' + escapeHtml(c.sourceFile.url) + '" target="_blank"' +
+      ' rel="noopener" title="' + escapeHtml(c.sourceFile.name) + '">📄 ' +
+      highlight(c.sourceFile.name, kw) + "</a>"
+    );
+  }
+
+  /** 关联 Invoice：跳转到 invoice 页面；多张时跳第一张并标注张数 */
+  function invoiceCell(c) {
+    if (!c.invoices || !c.invoices.length) return '<span class="ct-none">未开票</span>';
+    var suffix = c.invoices.length > 1 ? "（" + c.invoices.length + " 张）" : "";
+    return (
+      '<a class="ct-doc-link" href="invoice.html#no=' + encodeURIComponent(c.invoices[0]) +
+      '&contract=' + encodeURIComponent(c.id) + '">' +
+      highlight(c.invoices[0], kw) + suffix + "</a>"
+    );
   }
 
   /** 甲方 / 乙方各占 5 个单元格：公司、角色、地址、联系人、Contact Info */
@@ -260,6 +283,8 @@ function renderList() {
         partyCells(c.partyB) +
         "<td>" + escapeHtml(c.effectiveDate) + "</td>" +
         "<td>" + escapeHtml(c.endDate) + "</td>" +
+        "<td>" + fileCell(c) + "</td>" +
+        "<td>" + invoiceCell(c) + "</td>" +
         "<td>" + highlight(c.createdBy.name, kw) +
           '<span class="ct-sub">' + highlight(c.createdBy.at, kw) + "</span></td>" +
         "</tr>"
@@ -321,6 +346,7 @@ function setupListEvents() {
 
   // 整行点击进入表单
   $("ct-body").addEventListener("click", function (e) {
+    if (e.target.closest("a")) return; // 原文件 / Invoice 链接不进表单
     var tr = e.target.closest("tr[data-id]");
     if (!tr) return;
     openForm(tr.getAttribute("data-id"));
@@ -341,6 +367,23 @@ function syncAmountSection() {
   $("amount-hint").textContent = isSplit
     ? "Revenue Sharing 合同不填固定总额，按约定比例对分成基数分账，金额随实际流水结算。"
     : "填写合同总金额与币种；金额为含税总额时请在备注中注明。";
+}
+
+/** 回填只读的原文件 / 关联 Invoice 字段 */
+function fillDocFields(c) {
+  var hasFile = c.sourceFile && c.sourceFile.name;
+  $("fm-source-file").value = hasFile ? c.sourceFile.name : "无原文件";
+  $("fm-source-link").href = hasFile ? c.sourceFile.url : "#";
+  $("fm-source-link").hidden = !hasFile;
+
+  var invs = c.invoices || [];
+  $("fm-invoice-summary").value = invs.length
+    ? invs.join("、") + "（" + invs.length + " 张）"
+    : "未开票";
+  $("fm-invoice-link").href = invs.length
+    ? "invoice.html#no=" + encodeURIComponent(invs[0]) + "&contract=" + encodeURIComponent(c.id)
+    : "#";
+  $("fm-invoice-link").hidden = !invs.length;
 }
 
 /** 按 ID 找合同 */
@@ -386,6 +429,7 @@ function openForm(id) {
   $("fm-b-address").value = c.partyB.address;
   $("fm-b-contact").value = c.partyB.contact;
   $("fm-b-email").value = c.partyB.email;
+  fillDocFields(c);
   $("fm-created-by").value = c.createdBy.name + "　" + c.createdBy.at;
   $("fm-submitter").value = c.submitter.name;
   $("fm-dept").value = c.submitter.dept;
@@ -532,6 +576,9 @@ function collectForm(status) {
       contact: $("fm-b-contact").value.trim(),
       email: $("fm-b-email").value.trim(),
     },
+    // 原文件与关联 Invoice 由系统维护，表单只读展示，保存时原样带回
+    sourceFile: current ? current.sourceFile : null,
+    invoices: current ? current.invoices : [],
     // 创建人信息由系统记录，表单只读展示，保存时原样带回
     createdBy: {
       name: current ? current.createdBy.name : "",

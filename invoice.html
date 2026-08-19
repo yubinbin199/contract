@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="contract.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="panel">
+      <div class="panel-head panel-head-row">
+        <div>
+          <h2 id="inv-title">Invoice</h2>
+          <p class="subtitle" id="inv-subtitle">—</p>
+        </div>
+        <a class="btn-secondary" id="btn-back-contract" href="index.html">← 返回合同列表</a>
+      </div>
+
+      <div id="inv-detail"></div>
+
+      <!-- 同一份合同下的其他 invoice -->
+      <div id="inv-siblings"></div>
+    </div>
+  </div>
+
+  <script src="contract-data.js"></script>
+  <script src="invoice.js"></script>
+</body>
+</html>

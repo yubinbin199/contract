@@ -103,6 +103,103 @@
   cursor: default;
 }
 
+/* 原文件 / Invoice 链接 */
+.ct-doc-link {
+  color: var(--green);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(47, 107, 79, 0.4);
+}
+
+.ct-doc-link:hover {
+  border-bottom-style: solid;
+}
+
+.ct-none {
+  color: var(--muted);
+}
+
+/* 表单里的只读文件字段：输入框 + 右侧查看按钮 */
+.ct-file-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ct-file-btn {
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--green);
+  text-decoration: none;
+  white-space: nowrap;
+  background: #fff;
+}
+
+.ct-file-btn:hover {
+  border-color: var(--green);
+}
+
+.ct-file-btn[hidden] {
+  display: none;
+}
+
+/* ----- Invoice 明细页 ----- */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 10px 24px;
+}
+
+.inv-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.inv-label {
+  flex: none;
+  width: 110px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inv-value {
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.inv-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.inv-status.paid {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.inv-status.unpaid {
+  background: var(--peach);
+  color: #8a5a2b;
+}
+
+.inv-status.overdue {
+  background: #fae3e0;
+  color: #97402f;
+}
+
+@media (max-width: 760px) {
+  .inv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 搜索命中高亮 */
 .ct-hit {
   background: #fdf0c8;

@@ -93,6 +93,8 @@ var CONTRACTS = [
       contact: "",
       email: "xxxxx@mail.com",
     },
+    sourceFile: { name: "Adobe_Creative_Cloud_2026.pdf", url: "files/DR4188716.pdf" },
+    invoices: ["INV-2026-0518"],
     createdBy: { name: "Liao Wei", at: "2026-05-02 09:14:27" },
     submitter: { name: "Liao Wei", dept: "IT", date: "2026-05-02" },
     remark: "年度订阅，自动续约需提前 30 天通知。",
@@ -128,6 +130,8 @@ var CONTRACTS = [
       contact: "Aoi Mei",
       email: "mei@studio-aoi.jp",
     },
+    sourceFile: { name: "G123_Revenue_Sharing_2026.pdf", url: "files/DR4188742.pdf" },
+    invoices: ["INV-2026-0401", "INV-2026-0501"],
     createdBy: { name: "Sato Kenji", at: "2026-03-11 14:02:08" },
     submitter: { name: "Sato Kenji", dept: "事业开发", date: "2026-03-11" },
     remark: "按月结算，次月 15 日前出账。",
@@ -163,6 +167,8 @@ var CONTRACTS = [
       contact: "—",
       email: "sales@unity.com",
     },
+    sourceFile: { name: "Unity_Pro_License_2026.pdf", url: "files/DR4188755.pdf" },
+    invoices: ["INV-2026-0115"],
     createdBy: { name: "Liao Wei", at: "2026-01-16 10:37:51" },
     submitter: { name: "Liao Wei", dept: "IT", date: "2026-01-16" },
     remark: "",
@@ -198,6 +204,8 @@ var CONTRACTS = [
       contact: "林怡君",
       email: "lin@hongsheng.tw",
     },
+    sourceFile: { name: "TW_Distribution_2026.pdf", url: "files/DR4188768.pdf" },
+    invoices: ["INV-2026-0615"],
     createdBy: { name: "Chen Yu", at: "2026-06-02 16:45:03" },
     submitter: { name: "Chen Yu", dept: "海外发行", date: "2026-06-02" },
     remark: "",
@@ -233,6 +241,8 @@ var CONTRACTS = [
       contact: "周敏",
       email: "zhou@yulan.cn",
     },
+    sourceFile: { name: "IP_Sublicense_Merch_2026.pdf", url: "files/DR4188771.pdf" },
+    invoices: [],
     createdBy: { name: "Wang Lei", at: "2026-07-09 11:20:36" },
     submitter: { name: "Wang Lei", dept: "IP 商务", date: "2026-07-09" },
     remark: "季度结算，需提供第三方销售报表。",
@@ -268,6 +278,8 @@ var CONTRACTS = [
       contact: "刘洋",
       email: "liu@yunqi.cn",
     },
+    sourceFile: { name: "Admin_System_Outsourcing_2026.pdf", url: "files/DR4188783.pdf" },
+    invoices: ["INV-2026-0301"],
     createdBy: { name: "Zhang Hao", at: "2026-02-21 08:56:19" },
     submitter: { name: "Zhang Hao", dept: "研发中心", date: "2026-02-21" },
     remark: "驳回原因：付款节点与验收条款不匹配，需重新拟定。",
@@ -303,6 +315,8 @@ var CONTRACTS = [
       contact: "David Kim",
       email: "david@northgate.com",
     },
+    sourceFile: { name: "NA_Channel_RevShare_2026.pdf", url: "files/DR4188790.pdf" },
+    invoices: ["INV-2026-0501-NA"],
     createdBy: { name: "Emily Carter", at: "2026-04-19 13:08:44" },
     submitter: { name: "Emily Carter", dept: "海外发行", date: "2026-04-19" },
     remark: "",
@@ -338,8 +352,134 @@ var CONTRACTS = [
       contact: "田中 一郎",
       email: "tanaka@suncleen.jp",
     },
+    sourceFile: { name: "Office_Cleaning_2026.pdf", url: "files/DR4188802.pdf" },
+    invoices: ["INV-2026-0105"],
     createdBy: { name: "Tanaka Yui", at: "2026-01-06 09:03:12" },
     submitter: { name: "Tanaka Yui", dept: "总务", date: "2026-01-06" },
     remark: "",
   },
 ];
+
+/**
+ * 关联 Invoice 明细
+ * 合同表单 / 列表里的「关联 Invoice」点击后跳到 invoice.html?no=<no>
+ */
+var INVOICE_STATUSES = {
+  paid: "已付款",
+  unpaid: "待付款",
+  overdue: "已逾期",
+};
+
+var INVOICES = [
+  {
+    no: "INV-2026-0518",
+    contractId: "DR4188716",
+    title: "Adobe Creative Cloud 年度订阅",
+    amount: 18420,
+    currency: "USD",
+    issueDate: "2026-05-18",
+    dueDate: "2026-06-17",
+    status: "paid",
+    payee: "Adobe Systems Software Ireland Limited（ADIR）",
+    remark: "年度一次性开票。",
+  },
+  {
+    no: "INV-2026-0401",
+    contractId: "DR4188742",
+    title: "G123 平台分成结算（2026-03）",
+    amount: 24680.5,
+    currency: "USD",
+    issueDate: "2026-04-15",
+    dueDate: "2026-05-15",
+    status: "paid",
+    payee: "Studio Aoi Co., Ltd.",
+    remark: "按净收入 12% 分成结算。",
+  },
+  {
+    no: "INV-2026-0501",
+    contractId: "DR4188742",
+    title: "G123 平台分成结算（2026-04）",
+    amount: 31240,
+    currency: "USD",
+    issueDate: "2026-05-15",
+    dueDate: "2026-06-15",
+    status: "unpaid",
+    payee: "Studio Aoi Co., Ltd.",
+    remark: "按净收入 12% 分成结算。",
+  },
+  {
+    no: "INV-2026-0115",
+    contractId: "DR4188755",
+    title: "Unity Pro 企业授权年费",
+    amount: 46800,
+    currency: "USD",
+    issueDate: "2026-01-15",
+    dueDate: "2026-02-14",
+    status: "paid",
+    payee: "Unity Technologies",
+    remark: "",
+  },
+  {
+    no: "INV-2026-0615",
+    contractId: "DR4188768",
+    title: "台湾发行代理首期款",
+    amount: 1600000,
+    currency: "TWD",
+    issueDate: "2026-06-15",
+    dueDate: "2026-07-15",
+    status: "unpaid",
+    payee: "宏昇數位股份有限公司",
+    remark: "合同总额 50% 首期款。",
+  },
+  {
+    no: "INV-2026-0301",
+    contractId: "DR4188783",
+    title: "后台管理系统开发首期款",
+    amount: 258000,
+    currency: "CNY",
+    issueDate: "2026-03-01",
+    dueDate: "2026-03-31",
+    status: "overdue",
+    payee: "杭州云启软件有限公司",
+    remark: "合同已驳回，付款流程暂停。",
+  },
+  {
+    no: "INV-2026-0501-NA",
+    contractId: "DR4188790",
+    title: "北美渠道分成结算（2026-04）",
+    amount: 12850.75,
+    currency: "USD",
+    issueDate: "2026-05-10",
+    dueDate: "2026-06-09",
+    status: "unpaid",
+    payee: "Northgate Media LLC",
+    remark: "按平台流水 30% 分成结算。",
+  },
+  {
+    no: "INV-2026-0105",
+    contractId: "DR4188802",
+    title: "办公场地保洁服务（2026 年度）",
+    amount: 2640000,
+    currency: "JPY",
+    issueDate: "2026-01-05",
+    dueDate: "2026-02-04",
+    status: "paid",
+    payee: "サンクリーン株式会社",
+    remark: "",
+  },
+];
+
+/** 按合同 ID 取关联的 invoice 明细 */
+function invoicesOfContract(contractId) {
+  return INVOICES.filter(function (inv) {
+    return inv.contractId === contractId;
+  });
+}
+
+/** 按单号取 invoice */
+function findInvoice(no) {
+  for (var i = 0; i < INVOICES.length; i++) {
+    if (INVOICES[i].no === no) return INVOICES[i];
+  }
+  return null;
+}

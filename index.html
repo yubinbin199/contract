@@ -80,6 +80,8 @@
                 <th class="ct-group-th" colspan="5">Party B</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="effectiveDate">Effective Date</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="endDate">End Date</th>
+                <th rowspan="2">原文件</th>
+                <th rowspan="2">关联 Invoice</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="createdAt">Created By</th>
               </tr>
               <tr>
@@ -133,6 +135,26 @@
               <label class="filter">
                 <span class="ct-label">Region <b class="req">*</b></span>
                 <select id="fm-region"></select>
+              </label>
+
+              <!-- 原文件：合同 PDF，点击在新标签打开 -->
+              <label class="filter">
+                原文件
+                <span class="ct-file-field">
+                  <input type="text" id="fm-source-file" readonly />
+                  <a class="ct-file-btn" id="fm-source-link" href="#" target="_blank" rel="noopener">
+                    查看 PDF
+                  </a>
+                </span>
+              </label>
+
+              <!-- 关联 Invoice：跳转到 invoice 页面 -->
+              <label class="filter">
+                关联 Invoice
+                <span class="ct-file-field">
+                  <input type="text" id="fm-invoice-summary" readonly />
+                  <a class="ct-file-btn" id="fm-invoice-link" href="#">查看 Invoice</a>
+                </span>
               </label>
             </div>
           </div>
