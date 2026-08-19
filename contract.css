@@ -55,6 +55,75 @@
   background: var(--green-soft);
 }
 
+/* Contract ID：PDF 图标 + 编号，子合同缩进挂在主合同下 */
+.ct-id-cell {
+  white-space: nowrap;
+}
+
+.ct-pdf-icon {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: #fbfcfb;
+  vertical-align: middle;
+}
+
+.ct-id {
+  vertical-align: middle;
+}
+
+.ct-main-row .ct-id {
+  font-weight: 600;
+}
+
+.ct-id-cell.child {
+  padding-left: 26px;
+}
+
+.ct-branch {
+  display: inline-block;
+  width: 14px;
+  margin-left: -18px;
+  color: var(--muted);
+}
+
+/* 合同行为标签 */
+.ct-action {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  background: #eef1ef;
+  color: var(--muted);
+}
+
+.ct-action.main {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ct-action.renewal {
+  background: var(--blue-soft);
+  color: #35506e;
+}
+
+.ct-action.change,
+.ct-action.addendum {
+  background: var(--peach);
+  color: #8a5a2b;
+}
+
+.ct-action.termination {
+  background: #fae3e0;
+  color: #97402f;
+}
+
 /* 甲乙方分组表头 */
 .ct-table .ct-group-th {
   text-align: center;

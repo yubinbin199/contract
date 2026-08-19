@@ -1,7 +1,8 @@
 /**
  * contract.js
  * 负责：
- *  1) 合同列表：筛选（类型 / 地区 / 状态 / 币种 / 角色 / 生效日期区间）+ 关键词搜索 + 表头排序
+ *  1) 合同列表：筛选（行为 / 类型 / 地区 / 币种 / 角色 / 生效日期区间）+ 关键词搜索 + 表头排序
+ *     同一主合同号（C6-004 与 C6-004-T1、-T2）的合同排在一起，子合同缩进展示
  *  2) 合同表单：Basic / Dates / Amount / Party A / Party B / Submitter
  *     Amount 区块随合同类型切换 —— Revenue Sharing 显示 Revenue Split + Split Ratio，
  *     其余类型显示 Total Amount；Currency 是独立字段，两种类型都要填
@@ -12,8 +13,8 @@
 var filterState = {
   type: "",
   region: "",
-  status: "",
   currency: "",
+  action: "",
   role: "",
   effFrom: "",
   effTo: "",
@@ -81,6 +82,7 @@ function sortValue(c, key) {
   if (key === "splitRatio") {
     return c.amountMode === "split" ? Number(c.splitRatio || 0) : -1;
   }
+  if (key === "action") return contractActionLabel(c.action);
   if (key === "type") return contractTypeLabel(c.type);
   if (key === "status") return contractStatusLabel(c.status);
   if (key === "partyA") return c.partyA.company;
@@ -116,11 +118,12 @@ function fillSelect(el, items, placeholder) {
 
 function setupOptions() {
   fillSelect($("f-role"), LEGAL_ROLES, "全部");
+  fillSelect($("f-action"), CONTRACT_ACTIONS, "全部");
   fillSelect($("f-type"), CONTRACT_TYPES, "全部");
   fillSelect($("f-region"), CONTRACT_REGIONS, "全部");
-  fillSelect($("f-status"), CONTRACT_STATUSES, "全部");
   fillSelect($("f-currency"), CONTRACT_CURRENCIES, "全部");
 
+  fillSelect($("fm-action"), CONTRACT_ACTIONS, "请选择");
   fillSelect($("fm-type"), CONTRACT_TYPES, "请选择");
   fillSelect($("fm-region"), CONTRACT_REGIONS, "请选择");
   fillSelect($("fm-currency"), CONTRACT_CURRENCIES, "请选择");
@@ -135,6 +138,7 @@ function searchableText(c) {
   return [
     c.id,
     c.name,
+    contractActionLabel(c.action),
     contractTypeLabel(c.type),
     c.region,
     contractStatusLabel(c.status),
@@ -153,7 +157,6 @@ function searchableText(c) {
     c.splitRatio === null ? "" : c.splitRatio + "%",
     c.splitBase,
     c.sourceFile ? c.sourceFile.name : "",
-    (c.invoices || []).join(" "),
     c.createdBy.name,
     c.createdBy.at,
     c.submitter.name,
@@ -168,9 +171,9 @@ function applyFilters() {
   var kw = filterState.search.trim().toLowerCase();
 
   var rows = CONTRACTS.filter(function (c) {
+    if (filterState.action && c.action !== filterState.action) return false;
     if (filterState.type && c.type !== filterState.type) return false;
     if (filterState.region && c.region !== filterState.region) return false;
-    if (filterState.status && c.status !== filterState.status) return false;
     if (filterState.currency && c.currency !== filterState.currency) return false;
     // Legal role：甲方或乙方任一方命中即算符合
     if (
@@ -194,15 +197,44 @@ function applyFilters() {
     return (va > vb ? 1 : -1) * sortState.dir;
   });
 
-  return rows;
+  return groupByMainContract(rows);
+}
+
+/**
+ * 同一主合同号的合同排在一起：主合同在前，续约 / 变更 / 追加 / 解约按编号跟在后面。
+ * 组与组之间的先后仍按当前排序结果（取组内第一条出现的位置）。
+ */
+function groupByMainContract(rows) {
+  var order = [];
+  var groups = {};
+
+  rows.forEach(function (c) {
+    var gid = contractGroupId(c.id);
+    if (!groups[gid]) {
+      groups[gid] = [];
+      order.push(gid);
+    }
+    groups[gid].push(c);
+  });
+
+  var out = [];
+  order.forEach(function (gid) {
+    groups[gid].sort(function (a, b) {
+      // 主合同永远在最前，其余按编号（-T1、-T2…）升序
+      if (isMainContract(a.id) !== isMainContract(b.id)) return isMainContract(a.id) ? -1 : 1;
+      return a.id < b.id ? -1 : 1;
+    });
+    out = out.concat(groups[gid]);
+  });
+  return out;
 }
 
 /** 当前生效的筛选条件，展示成小胶囊 */
 function renderChips() {
   var chips = [];
+  if (filterState.action) chips.push("行为：" + contractActionLabel(filterState.action));
   if (filterState.type) chips.push("类型：" + contractTypeLabel(filterState.type));
   if (filterState.region) chips.push("地区：" + filterState.region);
-  if (filterState.status) chips.push("状态：" + contractStatusLabel(filterState.status));
   if (filterState.currency) chips.push("币种：" + filterState.currency);
   if (filterState.role) chips.push("角色：" + filterState.role);
   if (filterState.effFrom || filterState.effTo) {
@@ -240,17 +272,6 @@ function renderList() {
     );
   }
 
-  /** 关联 Invoice：跳转到 invoice 页面；多张时跳第一张并标注张数 */
-  function invoiceCell(c) {
-    if (!c.invoices || !c.invoices.length) return '<span class="ct-none">未开票</span>';
-    var suffix = c.invoices.length > 1 ? "（" + c.invoices.length + " 张）" : "";
-    return (
-      '<a class="ct-doc-link" href="invoice.html#no=' + encodeURIComponent(c.invoices[0]) +
-      '&contract=' + encodeURIComponent(c.id) + '">' +
-      highlight(c.invoices[0], kw) + suffix + "</a>"
-    );
-  }
-
   /** 甲方 / 乙方各占 5 个单元格：公司、角色、地址、联系人、Contact Info */
   function partyCells(p) {
     return (
@@ -263,13 +284,31 @@ function renderList() {
     );
   }
 
+  /**
+   * Contract ID：PDF 图标 + 编号。
+   * 子合同（C6-004-T1 之类）缩进一级挂在同组主合同下面。
+   */
+  function idCell(c, prev) {
+    var isMain = isMainContract(c.id);
+    var sameGroupAsPrev = prev && contractGroupId(prev.id) === contractGroupId(c.id);
+    return (
+      '<td class="ct-id-cell' + (isMain ? "" : " child") + '">' +
+      (isMain ? "" : '<span class="ct-branch">' + (sameGroupAsPrev ? "└" : "·") + "</span>") +
+      '<span class="ct-pdf-icon">PDF</span>' +
+      '<span class="ct-id">' + highlight(c.id, kw) + "</span></td>"
+    );
+  }
+
   $("ct-body").innerHTML = rows
-    .map(function (c) {
+    .map(function (c, i) {
       return (
-        '<tr data-id="' + escapeHtml(c.id) + '">' +
-        "<td>" + highlight(c.id, kw) + "</td>" +
+        '<tr data-id="' + escapeHtml(c.id) + '"' +
+        (isMainContract(c.id) ? ' class="ct-main-row"' : "") + ">" +
+        idCell(c, rows[i - 1]) +
         '<td><span class="ct-name" title="' + escapeHtml(c.name) + '">' +
           highlight(c.name, kw) + "</span></td>" +
+        '<td><span class="ct-action ' + c.action + '">' +
+          escapeHtml(contractActionLabel(c.action)) + "</span></td>" +
         '<td><span class="ct-tag ' + c.type + '">' + escapeHtml(contractTypeLabel(c.type)) + "</span></td>" +
         '<td class="num">' +
           (c.amountMode === "split"
@@ -284,7 +323,6 @@ function renderList() {
         "<td>" + escapeHtml(c.effectiveDate) + "</td>" +
         "<td>" + escapeHtml(c.endDate) + "</td>" +
         "<td>" + fileCell(c) + "</td>" +
-        "<td>" + invoiceCell(c) + "</td>" +
         "<td>" + highlight(c.createdBy.name, kw) +
           '<span class="ct-sub">' + highlight(c.createdBy.at, kw) + "</span></td>" +
         "</tr>"
@@ -295,9 +333,9 @@ function renderList() {
 
 function setupListEvents() {
   var bind = [
+    ["f-action", "action", "change"],
     ["f-type", "type", "change"],
     ["f-region", "region", "change"],
-    ["f-status", "status", "change"],
     ["f-currency", "currency", "change"],
     ["f-role", "role", "change"],
     ["f-eff-from", "effFrom", "change"],
@@ -316,8 +354,8 @@ function setupListEvents() {
     filterState = {
       type: "",
       region: "",
-      status: "",
       currency: "",
+      action: "",
       role: "",
       effFrom: "",
       effTo: "",
@@ -346,7 +384,7 @@ function setupListEvents() {
 
   // 整行点击进入表单
   $("ct-body").addEventListener("click", function (e) {
-    if (e.target.closest("a")) return; // 原文件 / Invoice 链接不进表单
+    if (e.target.closest("a")) return; // 原文件链接不进表单
     var tr = e.target.closest("tr[data-id]");
     if (!tr) return;
     openForm(tr.getAttribute("data-id"));
@@ -369,21 +407,12 @@ function syncAmountSection() {
     : "填写合同总金额与币种；金额为含税总额时请在备注中注明。";
 }
 
-/** 回填只读的原文件 / 关联 Invoice 字段 */
+/** 回填只读的原文件字段 */
 function fillDocFields(c) {
   var hasFile = c.sourceFile && c.sourceFile.name;
   $("fm-source-file").value = hasFile ? c.sourceFile.name : "无原文件";
   $("fm-source-link").href = hasFile ? c.sourceFile.url : "#";
   $("fm-source-link").hidden = !hasFile;
-
-  var invs = c.invoices || [];
-  $("fm-invoice-summary").value = invs.length
-    ? invs.join("、") + "（" + invs.length + " 张）"
-    : "未开票";
-  $("fm-invoice-link").href = invs.length
-    ? "invoice.html#no=" + encodeURIComponent(invs[0]) + "&contract=" + encodeURIComponent(c.id)
-    : "#";
-  $("fm-invoice-link").hidden = !invs.length;
 }
 
 /** 按 ID 找合同 */
@@ -402,11 +431,13 @@ function openForm(id) {
 
   $("form-title").textContent = "Summary · " + c.id;
   $("form-subtitle").textContent =
-    contractTypeLabel(c.type) + " · " + c.region + " · " + contractStatusLabel(c.status);
+    contractActionLabel(c.action) + " · " + contractTypeLabel(c.type) + " · " +
+    c.region + " · " + contractStatusLabel(c.status);
   $("form-error").textContent = "";
 
   $("fm-name").value = c.name;
   $("fm-id").value = c.id;
+  $("fm-action").value = c.action;
   $("fm-type").value = c.type;
   $("fm-region").value = c.region;
   $("fm-sign-date").value = c.signDate;
@@ -473,6 +504,7 @@ function validateForm() {
   var required = [
     ["fm-name", "Contract Name"],
     ["fm-id", "Contract ID"],
+    ["fm-action", "Contract Action"],
     ["fm-type", "Contract Type"],
     ["fm-region", "Region"],
     ["fm-sign-date", "Sign date"],
@@ -548,6 +580,7 @@ function collectForm(status) {
   return {
     id: $("fm-id").value.trim(),
     name: $("fm-name").value.trim(),
+    action: $("fm-action").value,
     type: $("fm-type").value,
     region: $("fm-region").value,
     status: status,
@@ -576,9 +609,8 @@ function collectForm(status) {
       contact: $("fm-b-contact").value.trim(),
       email: $("fm-b-email").value.trim(),
     },
-    // 原文件与关联 Invoice 由系统维护，表单只读展示，保存时原样带回
+    // 原文件由系统维护，表单只读展示，保存时原样带回
     sourceFile: current ? current.sourceFile : null,
-    invoices: current ? current.invoices : [],
     // 创建人信息由系统记录，表单只读展示，保存时原样带回
     createdBy: {
       name: current ? current.createdBy.name : "",

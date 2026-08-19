@@ -16,18 +16,16 @@ npm run start
 | --- | --- |
 | `index.html` | 列表视图 + 表单视图 |
 | `contract.js` | 筛选 / 搜索 / 排序、表单回填与校验 |
-| `contract-data.js` | 合同类型字典与演示数据（内存态，刷新即还原） |
-| `contract.css` | 合同页与 Invoice 页样式 |
+| `contract-data.js` | 合同字典与演示数据（内存态，刷新即还原） |
+| `contract.css` | 合同页样式 |
 | `styles.css` | 基础样式（面板、表格、筛选控件等公共组件） |
-| `invoice.html` / `invoice.js` | Invoice 明细页，从合同的「关联 Invoice」跳入 |
 | `files/*.pdf` | 各合同的原文件（演示用示例 PDF） |
 
 ## 功能
 
-- **列表**：按合同类型 / Region / 状态 / Currency / Legal role / Effective 日期区间筛选，关键词搜索覆盖合同名、ID、甲乙方公司与角色、地址、联系人、邮箱、金额、分成比例、创建人、原文件名、Invoice 单号，命中处高亮；多列可点表头排序
+- **列表**：按 Contract Action / 合同类型 / Region / Currency / Legal role / Effective 日期区间筛选，关键词搜索覆盖合同编号、名称、甲乙方公司与角色、地址、联系人、邮箱、金额、分成比例、创建人、原文件名，命中处高亮；多列可点表头排序
+- **合同编号分组**：`C6-004` 与 `C6-004-T1`、`C6-004-T2` 视为一组，列表里主合同在前、子合同缩进跟随，切换任何排序都保持分组
+- **Contract Action**：主合同 / 续约 / 变更 / 追加 / 解约
 - **表单**：Basic / Dates / Amount / Party A / Party B / Submitter 分区，点击列表任意一行进入
 - **Revenue Sharing**：Amount 区块切换为 Revenue Split + Split Ratio + 结算周期 + 分成基数，其余类型为 Total Amount；Currency 是两种类型共用的独立字段
 - **原文件**：列表与表单均可打开该合同的 PDF
-- **关联 Invoice**：点击跳转 `invoice.html#no=<单号>`，展示发票明细、关联合同以及同合同下的其他发票
-
-> 参数用 hash 而非 query：静态托管常把 `/invoice.html` 301 到 `/invoice` 并丢掉查询串，hash 不受影响。

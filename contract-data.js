@@ -13,6 +13,15 @@ var CONTRACT_TYPES = [
   { value: "other", label: "Other", revenueSplit: false },
 ];
 
+/** 合同行为：主合同之外的都是挂在主合同下的后续动作 */
+var CONTRACT_ACTIONS = [
+  { value: "main", label: "主合同" },
+  { value: "renewal", label: "续约" },
+  { value: "change", label: "变更" },
+  { value: "addendum", label: "追加" },
+  { value: "termination", label: "解约" },
+];
+
 var CONTRACT_REGIONS = ["JP", "CN", "TW", "US", "GLOBAL"];
 
 var CONTRACT_CURRENCIES = ["USD", "JPY", "CNY", "TWD"];
@@ -49,6 +58,14 @@ function contractTypeLabel(typeValue) {
   return "—";
 }
 
+/** 合同行为中文名 */
+function contractActionLabel(actionValue) {
+  for (var i = 0; i < CONTRACT_ACTIONS.length; i++) {
+    if (CONTRACT_ACTIONS[i].value === actionValue) return CONTRACT_ACTIONS[i].label;
+  }
+  return "—";
+}
+
 /** 状态中文名 */
 function contractStatusLabel(statusValue) {
   for (var i = 0; i < CONTRACT_STATUSES.length; i++) {
@@ -58,13 +75,28 @@ function contractStatusLabel(statusValue) {
 }
 
 /**
+ * 合同编号的主合同号：C6-004-T1 -> C6-004
+ * 同一主合同号的合同算一组，列表里排在一起、子合同缩进展示。
+ */
+function contractGroupId(id) {
+  return String(id).split("-T")[0];
+}
+
+/** 是否为主合同（编号不带 -T 后缀） */
+function isMainContract(id) {
+  return contractGroupId(id) === id;
+}
+
+/**
  * 演示合同列表
  * amountMode: "total"（总额）| "split"（分成），与合同类型保持一致
+ * action: 见 CONTRACT_ACTIONS；主合同为 main，其余挂在同组主合同下
  */
 var CONTRACTS = [
   {
-    id: "DR4188716",
+    id: "C6-001",
     name: "Adobe Creative Cloud 法人契約",
+    action: "main",
     type: "software_dev",
     region: "JP",
     status: "pending",
@@ -93,15 +125,52 @@ var CONTRACTS = [
       contact: "",
       email: "xxxxx@mail.com",
     },
-    sourceFile: { name: "Adobe_Creative_Cloud_2026.pdf", url: "files/DR4188716.pdf" },
-    invoices: ["INV-2026-0518"],
+    sourceFile: { name: "C6-001_Adobe_CC_2026.pdf", url: "files/C6-001.pdf" },
     createdBy: { name: "Liao Wei", at: "2026-05-02 09:14:27" },
     submitter: { name: "Liao Wei", dept: "IT", date: "2026-05-02" },
     remark: "年度订阅，自动续约需提前 30 天通知。",
   },
   {
-    id: "DR4188742",
+    id: "C6-001-T1",
+    name: "Adobe Creative Cloud 法人契約（续约 2027）",
+    action: "renewal",
+    type: "software_dev",
+    region: "JP",
+    status: "draft",
+    signDate: "2027-04-10",
+    endDate: "2028-05-18",
+    effectiveDate: "2027-05-19",
+    serviceStart: "2027-05-19",
+    serviceEnd: "2028-05-18",
+    amountMode: "total",
+    totalAmount: 19260,
+    currency: "USD",
+    splitRatio: null,
+    splitBase: "",
+    settleCycle: "",
+    partyA: {
+      company: "CTW INC",
+      role: "Client",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Liao Wei",
+      email: "liao@ctw.inc",
+    },
+    partyB: {
+      company: "Adobe",
+      role: "Service Provider",
+      address: "Adobe Systems Software Ireland Limited（ADIR）",
+      contact: "",
+      email: "xxxxx@mail.com",
+    },
+    sourceFile: { name: "C6-001-T1_Adobe_CC_Renewal.pdf", url: "files/C6-001-T1.pdf" },
+    createdBy: { name: "Liao Wei", at: "2027-04-11 10:05:33" },
+    submitter: { name: "Liao Wei", dept: "IT", date: "2027-04-11" },
+    remark: "席位数不变，单价上调 4.6%。",
+  },
+  {
+    id: "C6-002",
     name: "G123 平台游戏分成协议",
+    action: "main",
     type: "revenue_sharing",
     region: "JP",
     status: "approved",
@@ -130,15 +199,52 @@ var CONTRACTS = [
       contact: "Aoi Mei",
       email: "mei@studio-aoi.jp",
     },
-    sourceFile: { name: "G123_Revenue_Sharing_2026.pdf", url: "files/DR4188742.pdf" },
-    invoices: ["INV-2026-0401", "INV-2026-0501"],
+    sourceFile: { name: "C6-002_G123_RevShare.pdf", url: "files/C6-002.pdf" },
     createdBy: { name: "Sato Kenji", at: "2026-03-11 14:02:08" },
     submitter: { name: "Sato Kenji", dept: "事业开发", date: "2026-03-11" },
     remark: "按月结算，次月 15 日前出账。",
   },
   {
-    id: "DR4188755",
+    id: "C6-002-T1",
+    name: "G123 分成比例变更（12% → 15%）",
+    action: "change",
+    type: "revenue_sharing",
+    region: "JP",
+    status: "pending",
+    signDate: "2026-09-20",
+    endDate: "2029-03-31",
+    effectiveDate: "2026-10-01",
+    serviceStart: "2026-10-01",
+    serviceEnd: "2029-03-31",
+    amountMode: "split",
+    totalAmount: null,
+    currency: "USD",
+    splitRatio: 15,
+    splitBase: "净收入（扣除渠道费与退款）",
+    settleCycle: "monthly",
+    partyA: {
+      company: "CTW INC",
+      role: "Publisher",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Sato Kenji",
+      email: "sato@ctw.inc",
+    },
+    partyB: {
+      company: "Studio Aoi Co., Ltd.",
+      role: "Service Provider",
+      address: "2-4-1 SHIBUYA, SHIBUYA-KU, TOKYO-TO, JAPAN",
+      contact: "Aoi Mei",
+      email: "mei@studio-aoi.jp",
+    },
+    sourceFile: { name: "C6-002-T1_RevShare_Change.pdf", url: "files/C6-002-T1.pdf" },
+    createdBy: { name: "Sato Kenji", at: "2026-09-21 09:48:15" },
+    submitter: { name: "Sato Kenji", dept: "事业开发", date: "2026-09-21" },
+    remark: "因新增运营投入，自 2026-10 起上调分成比例。",
+  },
+  {
+    id: "C6-003",
     name: "Unity Pro 企业授权",
+    action: "main",
     type: "ip_license",
     region: "GLOBAL",
     status: "approved",
@@ -167,15 +273,15 @@ var CONTRACTS = [
       contact: "—",
       email: "sales@unity.com",
     },
-    sourceFile: { name: "Unity_Pro_License_2026.pdf", url: "files/DR4188755.pdf" },
-    invoices: ["INV-2026-0115"],
+    sourceFile: { name: "C6-003_Unity_Pro_License.pdf", url: "files/C6-003.pdf" },
     createdBy: { name: "Liao Wei", at: "2026-01-16 10:37:51" },
     submitter: { name: "Liao Wei", dept: "IT", date: "2026-01-16" },
     remark: "",
   },
   {
-    id: "DR4188768",
+    id: "C6-004",
     name: "台湾地区发行代理合同",
+    action: "main",
     type: "distribution",
     region: "TW",
     status: "pending",
@@ -204,15 +310,89 @@ var CONTRACTS = [
       contact: "林怡君",
       email: "lin@hongsheng.tw",
     },
-    sourceFile: { name: "TW_Distribution_2026.pdf", url: "files/DR4188768.pdf" },
-    invoices: ["INV-2026-0615"],
+    sourceFile: { name: "C6-004_TW_Distribution.pdf", url: "files/C6-004.pdf" },
     createdBy: { name: "Chen Yu", at: "2026-06-02 16:45:03" },
     submitter: { name: "Chen Yu", dept: "海外发行", date: "2026-06-02" },
     remark: "",
   },
   {
-    id: "DR4188771",
+    id: "C6-004-T1",
+    name: "台湾代理追加港澳地区",
+    action: "addendum",
+    type: "distribution",
+    region: "TW",
+    status: "approved",
+    signDate: "2026-11-05",
+    endDate: "2028-05-31",
+    effectiveDate: "2026-12-01",
+    serviceStart: "2026-12-01",
+    serviceEnd: "2028-05-31",
+    amountMode: "total",
+    totalAmount: 950000,
+    currency: "TWD",
+    splitRatio: null,
+    splitBase: "",
+    settleCycle: "",
+    partyA: {
+      company: "CTW INC",
+      role: "Client",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Chen Yu",
+      email: "chen@ctw.inc",
+    },
+    partyB: {
+      company: "宏昇數位股份有限公司",
+      role: "Distributor",
+      address: "台北市信義區松高路 11 號",
+      contact: "林怡君",
+      email: "lin@hongsheng.tw",
+    },
+    sourceFile: { name: "C6-004-T1_TW_Addendum_HKMO.pdf", url: "files/C6-004-T1.pdf" },
+    createdBy: { name: "Chen Yu", at: "2026-11-06 11:12:40" },
+    submitter: { name: "Chen Yu", dept: "海外发行", date: "2026-11-06" },
+    remark: "在原代理范围上追加港澳地区，费用单列。",
+  },
+  {
+    id: "C6-004-T2",
+    name: "台湾代理提前解约",
+    action: "termination",
+    type: "distribution",
+    region: "TW",
+    status: "draft",
+    signDate: "2027-08-12",
+    endDate: "2027-09-30",
+    effectiveDate: "2027-09-30",
+    serviceStart: "2026-06-15",
+    serviceEnd: "2027-09-30",
+    amountMode: "total",
+    totalAmount: 420000,
+    currency: "TWD",
+    splitRatio: null,
+    splitBase: "",
+    settleCycle: "",
+    partyA: {
+      company: "CTW INC",
+      role: "Client",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Chen Yu",
+      email: "chen@ctw.inc",
+    },
+    partyB: {
+      company: "宏昇數位股份有限公司",
+      role: "Distributor",
+      address: "台北市信義區松高路 11 號",
+      contact: "林怡君",
+      email: "lin@hongsheng.tw",
+    },
+    sourceFile: { name: "C6-004-T2_TW_Termination.pdf", url: "files/C6-004-T2.pdf" },
+    createdBy: { name: "Chen Yu", at: "2027-08-13 15:26:58" },
+    submitter: { name: "Chen Yu", dept: "海外发行", date: "2027-08-13" },
+    remark: "提前终止，金额为约定的解约补偿。",
+  },
+  {
+    id: "C6-005",
     name: "IP 角色形象二次授权（周边）",
+    action: "main",
     type: "revenue_sharing",
     region: "CN",
     status: "draft",
@@ -241,15 +421,52 @@ var CONTRACTS = [
       contact: "周敏",
       email: "zhou@yulan.cn",
     },
-    sourceFile: { name: "IP_Sublicense_Merch_2026.pdf", url: "files/DR4188771.pdf" },
-    invoices: [],
+    sourceFile: { name: "C6-005_IP_Sublicense_Merch.pdf", url: "files/C6-005.pdf" },
     createdBy: { name: "Wang Lei", at: "2026-07-09 11:20:36" },
     submitter: { name: "Wang Lei", dept: "IP 商务", date: "2026-07-09" },
     remark: "季度结算，需提供第三方销售报表。",
   },
   {
-    id: "DR4188783",
+    id: "C6-005-T1",
+    name: "IP 周边授权品类追加（文具线）",
+    action: "addendum",
+    type: "revenue_sharing",
+    region: "CN",
+    status: "pending",
+    signDate: "2027-01-18",
+    endDate: "2028-07-07",
+    effectiveDate: "2027-02-01",
+    serviceStart: "2027-02-01",
+    serviceEnd: "2028-07-07",
+    amountMode: "split",
+    totalAmount: null,
+    currency: "CNY",
+    splitRatio: 10,
+    splitBase: "文具线商品出厂价流水",
+    settleCycle: "quarterly",
+    partyA: {
+      company: "CTW INC",
+      role: "Licensor",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Wang Lei",
+      email: "wang@ctw.inc",
+    },
+    partyB: {
+      company: "上海羽澜文化传播有限公司",
+      role: "Licensee",
+      address: "上海市黄浦区中山南路 100 号",
+      contact: "周敏",
+      email: "zhou@yulan.cn",
+    },
+    sourceFile: { name: "C6-005-T1_IP_Addendum_Stationery.pdf", url: "files/C6-005-T1.pdf" },
+    createdBy: { name: "Wang Lei", at: "2027-01-19 14:33:07" },
+    submitter: { name: "Wang Lei", dept: "IP 商务", date: "2027-01-19" },
+    remark: "新增品类单独适用 10% 分成。",
+  },
+  {
+    id: "C6-006",
     name: "后台管理系统外包开发",
+    action: "main",
     type: "software_dev",
     region: "CN",
     status: "rejected",
@@ -278,15 +495,52 @@ var CONTRACTS = [
       contact: "刘洋",
       email: "liu@yunqi.cn",
     },
-    sourceFile: { name: "Admin_System_Outsourcing_2026.pdf", url: "files/DR4188783.pdf" },
-    invoices: ["INV-2026-0301"],
+    sourceFile: { name: "C6-006_Admin_Outsourcing.pdf", url: "files/C6-006.pdf" },
     createdBy: { name: "Zhang Hao", at: "2026-02-21 08:56:19" },
     submitter: { name: "Zhang Hao", dept: "研发中心", date: "2026-02-21" },
     remark: "驳回原因：付款节点与验收条款不匹配，需重新拟定。",
   },
   {
-    id: "DR4188790",
+    id: "C6-006-T1",
+    name: "后台管理系统开发工期变更",
+    action: "change",
+    type: "software_dev",
+    region: "CN",
+    status: "draft",
+    signDate: "2026-08-14",
+    endDate: "2027-02-28",
+    effectiveDate: "2026-09-01",
+    serviceStart: "2026-09-01",
+    serviceEnd: "2027-02-28",
+    amountMode: "total",
+    totalAmount: 120000,
+    currency: "CNY",
+    splitRatio: null,
+    splitBase: "",
+    settleCycle: "",
+    partyA: {
+      company: "CTW INC",
+      role: "Client",
+      address: "1-9-10 ROPPONGI, MINATO-KU, TOKYO-TO, 1060032, JAPAN",
+      contact: "Zhang Hao",
+      email: "zhang@ctw.inc",
+    },
+    partyB: {
+      company: "杭州云启软件有限公司",
+      role: "Service Provider",
+      address: "杭州市西湖区文三路 259 号",
+      contact: "刘洋",
+      email: "liu@yunqi.cn",
+    },
+    sourceFile: { name: "C6-006-T1_Schedule_Change.pdf", url: "files/C6-006-T1.pdf" },
+    createdBy: { name: "Zhang Hao", at: "2026-08-15 17:40:22" },
+    submitter: { name: "Zhang Hao", dept: "研发中心", date: "2026-08-15" },
+    remark: "工期顺延 3 个月，追加费用 12 万。",
+  },
+  {
+    id: "C6-007",
     name: "北美渠道分成协议",
+    action: "main",
     type: "revenue_sharing",
     region: "US",
     status: "pending",
@@ -315,15 +569,15 @@ var CONTRACTS = [
       contact: "David Kim",
       email: "david@northgate.com",
     },
-    sourceFile: { name: "NA_Channel_RevShare_2026.pdf", url: "files/DR4188790.pdf" },
-    invoices: ["INV-2026-0501-NA"],
+    sourceFile: { name: "C6-007_NA_Channel_RevShare.pdf", url: "files/C6-007.pdf" },
     createdBy: { name: "Emily Carter", at: "2026-04-19 13:08:44" },
     submitter: { name: "Emily Carter", dept: "海外发行", date: "2026-04-19" },
     remark: "",
   },
   {
-    id: "DR4188802",
+    id: "C6-008",
     name: "办公场地保洁服务",
+    action: "main",
     type: "other",
     region: "JP",
     status: "approved",
@@ -352,134 +606,9 @@ var CONTRACTS = [
       contact: "田中 一郎",
       email: "tanaka@suncleen.jp",
     },
-    sourceFile: { name: "Office_Cleaning_2026.pdf", url: "files/DR4188802.pdf" },
-    invoices: ["INV-2026-0105"],
+    sourceFile: { name: "C6-008_Office_Cleaning.pdf", url: "files/C6-008.pdf" },
     createdBy: { name: "Tanaka Yui", at: "2026-01-06 09:03:12" },
     submitter: { name: "Tanaka Yui", dept: "总务", date: "2026-01-06" },
     remark: "",
   },
 ];
-
-/**
- * 关联 Invoice 明细
- * 合同表单 / 列表里的「关联 Invoice」点击后跳到 invoice.html?no=<no>
- */
-var INVOICE_STATUSES = {
-  paid: "已付款",
-  unpaid: "待付款",
-  overdue: "已逾期",
-};
-
-var INVOICES = [
-  {
-    no: "INV-2026-0518",
-    contractId: "DR4188716",
-    title: "Adobe Creative Cloud 年度订阅",
-    amount: 18420,
-    currency: "USD",
-    issueDate: "2026-05-18",
-    dueDate: "2026-06-17",
-    status: "paid",
-    payee: "Adobe Systems Software Ireland Limited（ADIR）",
-    remark: "年度一次性开票。",
-  },
-  {
-    no: "INV-2026-0401",
-    contractId: "DR4188742",
-    title: "G123 平台分成结算（2026-03）",
-    amount: 24680.5,
-    currency: "USD",
-    issueDate: "2026-04-15",
-    dueDate: "2026-05-15",
-    status: "paid",
-    payee: "Studio Aoi Co., Ltd.",
-    remark: "按净收入 12% 分成结算。",
-  },
-  {
-    no: "INV-2026-0501",
-    contractId: "DR4188742",
-    title: "G123 平台分成结算（2026-04）",
-    amount: 31240,
-    currency: "USD",
-    issueDate: "2026-05-15",
-    dueDate: "2026-06-15",
-    status: "unpaid",
-    payee: "Studio Aoi Co., Ltd.",
-    remark: "按净收入 12% 分成结算。",
-  },
-  {
-    no: "INV-2026-0115",
-    contractId: "DR4188755",
-    title: "Unity Pro 企业授权年费",
-    amount: 46800,
-    currency: "USD",
-    issueDate: "2026-01-15",
-    dueDate: "2026-02-14",
-    status: "paid",
-    payee: "Unity Technologies",
-    remark: "",
-  },
-  {
-    no: "INV-2026-0615",
-    contractId: "DR4188768",
-    title: "台湾发行代理首期款",
-    amount: 1600000,
-    currency: "TWD",
-    issueDate: "2026-06-15",
-    dueDate: "2026-07-15",
-    status: "unpaid",
-    payee: "宏昇數位股份有限公司",
-    remark: "合同总额 50% 首期款。",
-  },
-  {
-    no: "INV-2026-0301",
-    contractId: "DR4188783",
-    title: "后台管理系统开发首期款",
-    amount: 258000,
-    currency: "CNY",
-    issueDate: "2026-03-01",
-    dueDate: "2026-03-31",
-    status: "overdue",
-    payee: "杭州云启软件有限公司",
-    remark: "合同已驳回，付款流程暂停。",
-  },
-  {
-    no: "INV-2026-0501-NA",
-    contractId: "DR4188790",
-    title: "北美渠道分成结算（2026-04）",
-    amount: 12850.75,
-    currency: "USD",
-    issueDate: "2026-05-10",
-    dueDate: "2026-06-09",
-    status: "unpaid",
-    payee: "Northgate Media LLC",
-    remark: "按平台流水 30% 分成结算。",
-  },
-  {
-    no: "INV-2026-0105",
-    contractId: "DR4188802",
-    title: "办公场地保洁服务（2026 年度）",
-    amount: 2640000,
-    currency: "JPY",
-    issueDate: "2026-01-05",
-    dueDate: "2026-02-04",
-    status: "paid",
-    payee: "サンクリーン株式会社",
-    remark: "",
-  },
-];
-
-/** 按合同 ID 取关联的 invoice 明细 */
-function invoicesOfContract(contractId) {
-  return INVOICES.filter(function (inv) {
-    return inv.contractId === contractId;
-  });
-}
-
-/** 按单号取 invoice */
-function findInvoice(no) {
-  for (var i = 0; i < INVOICES.length; i++) {
-    if (INVOICES[i].no === no) return INVOICES[i];
-  }
-  return null;
-}

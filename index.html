@@ -16,11 +16,15 @@
         <div class="panel-head panel-head-row">
           <div>
             <h2>合同管理</h2>
-            <p class="subtitle">按类型 / 地区 / 状态筛选，点击一行进入合同表单</p>
+            <p class="subtitle">按类型 / 地区 / 币种等条件筛选，点击一行进入合同表单</p>
           </div>
         </div>
 
         <div class="table-toolbar" id="ct-toolbar">
+          <label class="filter inline-filter">
+            Contract Action
+            <select id="f-action"><option value="">全部</option></select>
+          </label>
           <label class="filter inline-filter">
             Contract type
             <select id="f-type"><option value="">全部</option></select>
@@ -28,10 +32,6 @@
           <label class="filter inline-filter">
             Region
             <select id="f-region"><option value="">全部</option></select>
-          </label>
-          <label class="filter inline-filter">
-            状态
-            <select id="f-status"><option value="">全部</option></select>
           </label>
           <label class="filter inline-filter">
             Currency
@@ -54,7 +54,7 @@
             <input
               type="text"
               id="f-search"
-              placeholder="按合同名称 / ID / 甲乙方公司 / 角色 / 地址 / 联系人 / 邮箱 / 金额 / 分成比例 / 创建人搜索"
+              placeholder="按合同编号 / 名称 / 甲乙方公司 / 角色 / 地址 / 联系人 / 邮箱 / 金额 / 分成比例 / 创建人搜索"
             />
           </label>
           <button type="button" class="cf-btn cf-ghost" id="btn-reset-filter">重置筛选</button>
@@ -71,6 +71,7 @@
               <tr>
                 <th class="sortable-th" rowspan="2" data-sort-key="id">Contract ID</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="name">Contract Name</th>
+                <th class="sortable-th" rowspan="2" data-sort-key="action">Contract Action</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="type">Contract Type</th>
                 <th class="sortable-th num" rowspan="2" data-sort-key="amount">Amount</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="currency">Currency</th>
@@ -81,7 +82,6 @@
                 <th class="sortable-th" rowspan="2" data-sort-key="effectiveDate">Effective Date</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="endDate">End Date</th>
                 <th rowspan="2">原文件</th>
-                <th rowspan="2">关联 Invoice</th>
                 <th class="sortable-th" rowspan="2" data-sort-key="createdAt">Created By</th>
               </tr>
               <tr>
@@ -129,6 +129,10 @@
                 <input type="text" id="fm-id" placeholder="例：DR4188716" />
               </label>
               <label class="filter">
+                <span class="ct-label">Contract Action <b class="req">*</b></span>
+                <select id="fm-action"></select>
+              </label>
+              <label class="filter">
                 <span class="ct-label">Contract Type <b class="req">*</b></span>
                 <select id="fm-type"></select>
               </label>
@@ -145,15 +149,6 @@
                   <a class="ct-file-btn" id="fm-source-link" href="#" target="_blank" rel="noopener">
                     查看 PDF
                   </a>
-                </span>
-              </label>
-
-              <!-- 关联 Invoice：跳转到 invoice 页面 -->
-              <label class="filter">
-                关联 Invoice
-                <span class="ct-file-field">
-                  <input type="text" id="fm-invoice-summary" readonly />
-                  <a class="ct-file-btn" id="fm-invoice-link" href="#">查看 Invoice</a>
                 </span>
               </label>
             </div>
