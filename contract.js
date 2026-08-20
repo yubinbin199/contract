@@ -138,6 +138,7 @@ function searchableText(c) {
   return [
     c.id,
     c.name,
+    c.action,
     contractActionLabel(c.action),
     contractTypeLabel(c.type),
     c.region,
